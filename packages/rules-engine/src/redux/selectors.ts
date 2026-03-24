@@ -1,5 +1,5 @@
 import type { RulesEngineAny } from '../types';
-import { rulesEngineSlice } from './rulesEngineSlice';
+import { rulesEngineSliceSelectors } from './rulesEngineSlice';
 import type { RqbState } from './types';
 
 /**
@@ -12,7 +12,4 @@ import type { RqbState } from './types';
 export const getRulesEngineSelectorById =
   (reId: string) =>
   (state: RqbState): RulesEngineAny =>
-    rulesEngineSlice.selectors.getRulesEngineSelectorById(
-      { rulesEngines: state.rulesEngines },
-      reId
-    );
+    rulesEngineSliceSelectors.getRulesEngineSelectorById(state.rulesEngines, reId);

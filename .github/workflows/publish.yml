@@ -1,44 +1,63 @@
-name: Publish
+name: Publish to GitHub Packages
 
 on:
   workflow_dispatch:
-    inputs:
-      versionTag:
-        description: "Version tag"
-        required: true
-        default: next
-        type: choice
-        options:
-          - next
-          - latest
-          - custom
-      customVersionTag:
-        description: "Custom version tag"
-        type: string
 
 jobs:
-  Publish:
+  publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      id-token: write
-    env:
-      NPM_CONFIG_PROVENANCE: true
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      contents: read
+      packages: write
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
-      - uses: oven-sh/setup-bun@v2
-        # with:
-        #   bun-version: 1.1.29
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@smiziara"
+
       - run: bun install --frozen-lockfile
-      - run: bun --bun run build
-      - run: bun ./utils/decatalog.ts # temp workaround for lerna-lite catalog issue
-      - name: Publish
-        run: npx lerna publish from-package --yes --no-git-reset --dist-tag ${{ inputs.versionTag == 'custom' && inputs.customVersionTag || inputs.versionTag }}
+
+      - run: bun run build
+
+      - name: Rewrite package scopes for GitHub Packages
+        shell: bash
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+          SCOPE="@${OWNER}"
+
+          for pkg in packages/*/package.json; do
+            # Rewrite package name: @react-querybuilder/foo -> @owner/react-querybuilder-foo
+            # and react-querybuilder -> @owner/react-querybuilder
+            node -e "
+              const fs = require('fs');
+              const pkg = JSON.parse(fs.readFileSync('$pkg', 'utf8'));
+              const oldName = pkg.name;
+              if (oldName.startsWith('@react-querybuilder/')) {
+                pkg.name = '${SCOPE}/react-querybuilder-' + oldName.replace('@react-querybuilder/', '');
+              } else if (oldName === 'react-querybuilder') {
+                pkg.name = '${SCOPE}/react-querybuilder';
+              }
+              pkg.publishConfig = { registry: 'https://npm.pkg.github.com' };
+              fs.writeFileSync('$pkg', JSON.stringify(pkg, null, 2) + '\n');
+              console.log(oldName + ' -> ' + pkg.name);
+            "
+          done
+
+      - name: Publish packages
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pkg in packages/*/; do
+            if [ -f "$pkg/package.json" ]; then
+              echo "Publishing $pkg..."
+              cd "$pkg"
+              npm publish --access public || echo "Skipped $pkg (may already exist)"
+              cd "$GITHUB_WORKSPACE"
+            fi
+          done

@@ -1,4 +1,4 @@
-import type { PayloadAction, Slice } from '@reduxjs/toolkit';
+import type { PayloadAction, Slice, SliceCaseReducers } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import type { RulesEngineAny } from '../types';
 import type { RulesEngineSliceState } from './types';
@@ -12,28 +12,32 @@ const initialState: RulesEngineSliceState = {};
 
 const name = 'rulesEngines';
 
-export const rulesEngineSlice: Slice<
-  RulesEngineSliceState,
-  {
-    setRulesEngineState: (
-      state: RulesEngineSliceState,
-      action: PayloadAction<SetRulesEngineStateParams>
-    ) => void;
-  },
-  typeof name,
-  typeof name,
-  {
-    getRulesEngineSelectorById: (state: RulesEngineSliceState, reId: string) => RulesEngineAny;
-  }
-> = createSlice({
-  name,
-  initialState,
-  reducers: {
-    setRulesEngineState: (state, { payload: { reId, rulesEngine } }) => {
-      state[reId] = rulesEngine;
+interface RulesEngineReducers extends SliceCaseReducers<RulesEngineSliceState> {
+  setRulesEngineState: (
+    state: RulesEngineSliceState,
+    action: PayloadAction<SetRulesEngineStateParams>
+  ) => void;
+}
+
+export const rulesEngineSlice: Slice<RulesEngineSliceState, RulesEngineReducers, typeof name> =
+  createSlice({
+    name,
+    initialState,
+    reducers: {
+      setRulesEngineState: (
+        state,
+        { payload: { reId, rulesEngine } }: PayloadAction<SetRulesEngineStateParams>
+      ) => {
+        state[reId] = rulesEngine;
+      },
     },
-  },
-  selectors: {
-    getRulesEngineSelectorById: (state, reId) => state[reId],
-  },
-});
+  });
+
+export interface RulesEngineSliceSelectors {
+  getRulesEngineSelectorById: (state: RulesEngineSliceState, reId: string) => RulesEngineAny;
+}
+
+export const rulesEngineSliceSelectors: RulesEngineSliceSelectors = {
+  getRulesEngineSelectorById: (state: RulesEngineSliceState, reId: string): RulesEngineAny =>
+    state[reId],
+};

@@ -33,7 +33,8 @@ const getNewStore = () =>
 const Wrapper = ({ children }: React.PropsWithChildren) => {
   const [store] = React.useState(getNewStore);
   return (
-    <Provider store={store} context={QueryBuilderStateContext}>
+    // oxlint-disable-next-line typescript/no-explicit-any
+    <Provider store={store} context={QueryBuilderStateContext as any}>
       {children}
     </Provider>
   );

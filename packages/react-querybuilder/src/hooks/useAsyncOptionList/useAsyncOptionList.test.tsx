@@ -1,7 +1,7 @@
 import type { FullField, RuleType } from '@react-querybuilder/core';
 import { generateID, standardClassnames } from '@react-querybuilder/core';
-import type { EnhancedStore } from '@reduxjs/toolkit';
 import { configureStore } from '@reduxjs/toolkit';
+import type { EnhancedStore } from '@reduxjs/toolkit';
 import { waitABeat } from '@rqb-testing';
 import { act, renderHook } from '@testing-library/react';
 import * as React from 'react';
@@ -12,6 +12,7 @@ import { warningsSlice } from '../../redux/warningsSlice';
 import type { Schema, ValueEditorProps, VersatileSelectorProps } from '../../types';
 import {
   asyncOptionListsSlice,
+  asyncOptionListsSliceSelectors,
   DEFAULT_CACHE_TTL,
   getOptionListsAsync,
 } from './asyncOptionListsSlice';
@@ -73,7 +74,8 @@ const ReduxWrapper = ({
 }) => {
   const [store] = React.useState(() => storeProp ?? createTestStore());
   return (
-    <Provider store={store} context={QueryBuilderStateContext}>
+    // oxlint-disable-next-line typescript/no-explicit-any
+    <Provider store={store} context={QueryBuilderStateContext as any}>
       {children}
     </Provider>
   );
@@ -88,7 +90,10 @@ const getWrapper = () => {
   return { store, wrapper };
 };
 
-const { selectCacheByKey, selectErrorByKey } = asyncOptionListsSlice.selectors;
+const selectCacheByKey = (state: ReturnType<ReturnType<typeof createTestStore>['getState']>, key: string) =>
+  asyncOptionListsSliceSelectors.selectCacheByKey(state.asyncOptionLists, key);
+const selectErrorByKey = (state: ReturnType<ReturnType<typeof createTestStore>['getState']>, key: string) =>
+  asyncOptionListsSliceSelectors.selectErrorByKey(state.asyncOptionLists, key);
 
 beforeEach(() => {
   jest.clearAllMocks();

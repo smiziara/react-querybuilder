@@ -13,18 +13,20 @@ it('adds a slice with addSlice', () => {
     name: 'counter-as',
     initialState: { value: 0 } as CounterState,
     reducers: { increment: state => void state.value++ },
-    selectors: { selectValue: state => state.value },
   });
+
+  const selectValue = (rootState: Record<string, unknown>) =>
+    (rootState['counter-as'] as CounterState).value;
 
   const queryBuilderStore = getRqbStore();
 
   queryBuilderStore.addSlice(counterSliceAS);
 
   expect(queryBuilderStore.getState()).toHaveProperty('queries', {});
-  expect(counterSliceAS.selectors.selectValue(getAnyState(queryBuilderStore))).toBe(0);
+  expect(selectValue(getAnyState(queryBuilderStore))).toBe(0);
 
   queryBuilderStore.dispatch(counterSliceAS.actions.increment());
-  expect(counterSliceAS.selectors.selectValue(getAnyState(queryBuilderStore))).toBe(1);
+  expect(selectValue(getAnyState(queryBuilderStore))).toBe(1);
 });
 
 it('adds a slice with injectSlice', () => {
@@ -32,16 +34,18 @@ it('adds a slice with injectSlice', () => {
     name: 'counter-is',
     initialState: { value: 0 } as CounterState,
     reducers: { increment: state => void state.value++ },
-    selectors: { selectValue: state => state.value },
   });
+
+  const selectValue = (rootState: Record<string, unknown>) =>
+    (rootState['counter-is'] as CounterState).value;
 
   injectSlice(counterSliceIS);
 
   const queryBuilderStore = getRqbStore();
 
   expect(queryBuilderStore.getState()).toHaveProperty('queries', {});
-  expect(counterSliceIS.selectors.selectValue(getAnyState(queryBuilderStore))).toBe(0);
+  expect(selectValue(getAnyState(queryBuilderStore))).toBe(0);
 
   queryBuilderStore.dispatch(counterSliceIS.actions.increment());
-  expect(counterSliceIS.selectors.selectValue(getAnyState(queryBuilderStore))).toBe(1);
+  expect(selectValue(getAnyState(queryBuilderStore))).toBe(1);
 });

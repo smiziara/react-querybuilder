@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { injectSlice, QueryBuilderStateContext } from 'react-querybuilder';
 import { getInternalHooks } from '../../redux/_internal/hooks';
 import type { ValueEditorProps, VersatileSelectorProps } from '../../types';
-import { asyncOptionListsSlice, getOptionListsAsync } from './asyncOptionListsSlice';
+import { asyncOptionListsSlice, asyncOptionListsSliceSelectors, getOptionListsAsync } from './asyncOptionListsSlice';
 import type { UseAsyncOptionList, UseAsyncOptionListParams } from './types';
 import { useAsyncCacheKey } from './useAsyncCacheKey';
 
@@ -52,7 +52,10 @@ export function useAsyncOptionList<PropsType extends VersatileSelectorProps | Va
   const cacheKey = useAsyncCacheKey(props, params);
 
   const cached = useRQB_INTERNAL_QueryBuilderSelector(s =>
-    asyncOptionListsSlice.selectors.selectCacheByKey(s, cacheKey)
+    asyncOptionListsSliceSelectors.selectCacheByKey(
+      (s as { asyncOptionLists: import('./types').AsyncOptionListsSliceState }).asyncOptionLists,
+      cacheKey
+    )
   );
 
   const cacheIsValid = !!cached && Date.now() <= cached.validUntil;
@@ -62,11 +65,17 @@ export function useAsyncOptionList<PropsType extends VersatileSelectorProps | Va
   const isLoading =
     params.isLoading ||
     useRQB_INTERNAL_QueryBuilderSelector(s =>
-      asyncOptionListsSlice.selectors.selectIsLoadingByKey(s, cacheKey)
+      asyncOptionListsSliceSelectors.selectIsLoadingByKey(
+        (s as { asyncOptionLists: import('./types').AsyncOptionListsSliceState }).asyncOptionLists,
+        cacheKey
+      )
     );
 
   const errors = useRQB_INTERNAL_QueryBuilderSelector(s =>
-    asyncOptionListsSlice.selectors.selectErrorByKey(s, cacheKey)
+    asyncOptionListsSliceSelectors.selectErrorByKey(
+      (s as { asyncOptionLists: import('./types').AsyncOptionListsSliceState }).asyncOptionLists,
+      cacheKey
+    )
   );
 
   const className = useMemo(
@@ -113,9 +122,6 @@ export function useAsyncOptionList<PropsType extends VersatileSelectorProps | Va
   return {
     ...props,
     ...(optionsProp ? { options } : { values: options }),
-    // Alternative to the previous line:
-    // options,
-    // values: options,
     className,
     isLoading,
     errors,

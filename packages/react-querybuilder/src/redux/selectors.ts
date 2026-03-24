@@ -1,5 +1,5 @@
 import type { RuleGroupTypeAny } from '@react-querybuilder/core';
-import { queriesSlice } from './queriesSlice';
+import { queriesSliceSelectors } from './queriesSlice';
 import type { RqbState } from './types';
 
 /**
@@ -12,4 +12,4 @@ import type { RqbState } from './types';
 export const getQuerySelectorById =
   (qbId: string) =>
   (state: RqbState): RuleGroupTypeAny =>
-    queriesSlice.selectors.getQuerySelectorById({ queries: state.queries }, qbId);
+    queriesSliceSelectors.getQuerySelectorById(state.queries, qbId);
