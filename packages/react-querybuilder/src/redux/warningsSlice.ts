@@ -1,4 +1,4 @@
-import type { PayloadAction, Slice } from '@reduxjs/toolkit';
+import type { PayloadAction, Slice, SliceCaseReducers } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { messages } from '../messages';
 
@@ -24,18 +24,16 @@ const initialState: WarningsSliceState = {
   [messages.errorDeprecatedDebugImport]: false,
 };
 
-export const warningsSlice: Slice<
-  WarningsSliceState,
-  {
-    // oxlint-disable-next-line typescript/no-explicit-any
-    rqbWarn: (state: any, { payload }: PayloadAction<Messages>) => void;
-  },
-  'warnings'
-> = createSlice({
+interface WarningsReducers extends SliceCaseReducers<WarningsSliceState> {
+  // oxlint-disable-next-line typescript/no-explicit-any
+  rqbWarn: (state: any, action: PayloadAction<Messages>) => void;
+}
+
+export const warningsSlice: Slice<WarningsSliceState, WarningsReducers, 'warnings'> = createSlice({
   name: 'warnings',
   initialState,
   reducers: {
-    rqbWarn: (state, { payload }) => {
+    rqbWarn: (state, { payload }: PayloadAction<Messages>) => {
       if (!state[payload]) {
         console.error(payload);
         state[payload] = true;

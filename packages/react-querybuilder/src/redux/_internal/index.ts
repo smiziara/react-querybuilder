@@ -1,6 +1,6 @@
 import type { RuleGroupType, RuleGroupTypeIC } from '@react-querybuilder/core';
-import type { ConfigureStoreOptions, PayloadAction, Store, ThunkAction } from '@reduxjs/toolkit';
-import type { TypedUseSelectorHook, UseStore } from 'react-redux';
+import type { ConfigureStoreOptions, PayloadAction, ThunkAction, AnyAction } from '@reduxjs/toolkit';
+import type { TypedUseSelectorHook } from 'react-redux';
 import type { SetQueryStateParams } from '../queriesSlice';
 import { queriesSlice } from '../queriesSlice';
 import { QueryBuilderStateContext } from '../QueryBuilderStateContext';
@@ -8,7 +8,7 @@ import { rootReducer } from '../rootReducer';
 import type { RqbState } from '../types';
 import type { Messages } from '../warningsSlice';
 import { warningsSlice } from '../warningsSlice';
-import type { UseQueryBuilderDispatch } from './hooks';
+import type { UseQueryBuilderDispatch, UseQueryBuilderStore } from './hooks';
 import { getInternalHooks } from './hooks';
 
 export const _RQB_INTERNAL_dispatchThunk =
@@ -28,19 +28,10 @@ export const _RQB_INTERNAL_dispatchThunk =
 
 const internalHooks = getInternalHooks(QueryBuilderStateContext);
 
-/**
- * Gets the `dispatch` function for the RQB Redux store.
- */
 export const useRQB_INTERNAL_QueryBuilderDispatch: UseQueryBuilderDispatch =
   internalHooks.useRQB_INTERNAL_QueryBuilderDispatch;
-/**
- * Gets the full RQB Redux store.
- */
-export const useRQB_INTERNAL_QueryBuilderStore: UseStore<Store<RqbState>> =
+export const useRQB_INTERNAL_QueryBuilderStore: UseQueryBuilderStore =
   internalHooks.useRQB_INTERNAL_QueryBuilderStore;
-/**
- * General purpose selector hook for the RQB Redux store.
- */
 export const useRQB_INTERNAL_QueryBuilderSelector: TypedUseSelectorHook<RqbState> =
   internalHooks.useRQB_INTERNAL_QueryBuilderSelector;
 
@@ -55,8 +46,6 @@ export const rqbWarn =
 const preloadedState = {
   queries: queriesSlice.getInitialState(),
   warnings: warningsSlice.getInitialState(),
-  // Avoid importing the async slice itself to ensure lazy loading
-  // asyncOptionLists: { cache: {}, loading: {}, errors: {} },
 } as RqbState;
 
 export const storeCommon: ConfigureStoreOptions = {
@@ -64,11 +53,9 @@ export const storeCommon: ConfigureStoreOptions = {
   preloadedState,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
-      // Ignore non-serializable values in setQueryState actions and rule `value`s
-      // https://redux-toolkit.js.org/usage/usage-guide#working-with-non-serializable-data
       serializableCheck: {
         ignoredActions: [queriesSlice.actions.setQueryState.type],
-        ignoredPaths: [/^queries\b.*\.rules\.\d+\.value$/],
+        ignoredPaths: ['queries'],
       },
     }),
 };

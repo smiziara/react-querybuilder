@@ -1,20 +1,12 @@
-import type {
-  Dispatch,
-  PayloadAction,
-  Store,
-  ThunkAction,
-  ThunkDispatch,
-  UnknownAction,
-} from '@reduxjs/toolkit';
+import type { AnyAction, PayloadAction, ThunkAction, ThunkDispatch } from '@reduxjs/toolkit';
+import type { Dispatch } from 'redux';
 import { QueryBuilderStateContext } from 'react-querybuilder';
-import type { ReactReduxContextValue, TypedUseSelectorHook, UseStore } from 'react-redux';
+import type { ReactReduxContextValue, TypedUseSelectorHook } from 'react-redux';
 import { createDispatchHook, createSelectorHook, createStoreHook } from 'react-redux';
 import type { RulesEngine, RulesEngineIC } from '../types';
 import type { SetRulesEngineStateParams } from './rulesEngineSlice';
 import { rulesEngineSlice } from './rulesEngineSlice';
-import type { RqbState } from './types';
-
-type QBSCType = React.Context<ReactReduxContextValue<RqbState> | null>;
+import type { RqbState, RulesEngineSliceState } from './types';
 
 declare module './types' {
   export interface RqbState {
@@ -22,22 +14,20 @@ declare module './types' {
   }
 }
 
-/**
- * Gets the full RQB Redux store.
- */
-export const useRQB_INTERNAL_QueryBuilderStore: UseStore<Store<RqbState>> = createStoreHook(
-  QueryBuilderStateContext as QBSCType
-);
+type NonNullCtx = React.Context<ReactReduxContextValue<RqbState>>;
 
-/**
- * Gets the `dispatch` function for the RQB Redux store.
- */
+export const useRQB_INTERNAL_QueryBuilderStore: () => import('redux').Store<RqbState> = createStoreHook(
+  QueryBuilderStateContext as unknown as NonNullCtx
+) as () => import('redux').Store<RqbState>;
+
 export const useRQB_INTERNAL_QueryBuilderDispatch: UseQueryBuilderDispatch =
-  createDispatchHook(QueryBuilderStateContext);
-type UseQueryBuilderDispatch = () => ThunkDispatch<RqbState, undefined, UnknownAction> & Dispatch;
+  createDispatchHook(
+    QueryBuilderStateContext as unknown as NonNullCtx
+  ) as unknown as UseQueryBuilderDispatch;
+type UseQueryBuilderDispatch = () => ThunkDispatch<RqbState, undefined, AnyAction> & Dispatch;
 
 export const useRQB_INTERNAL_QueryBuilderSelector: TypedUseSelectorHook<RqbState> =
-  createSelectorHook(QueryBuilderStateContext);
+  createSelectorHook(QueryBuilderStateContext as unknown as NonNullCtx);
 
 export const _RQB_INTERNAL_dispatchThunk =
   ({

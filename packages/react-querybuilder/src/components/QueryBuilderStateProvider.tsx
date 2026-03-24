@@ -10,7 +10,8 @@ import { QueryBuilderStateContext, getRqbStore } from '../redux';
 export const QueryBuilderStateProvider = (props: {
   children: React.ReactNode;
 }): React.JSX.Element => (
-  <Provider context={QueryBuilderStateContext} store={getRqbStore()}>
+  // oxlint-disable-next-line typescript/no-explicit-any
+  <Provider context={QueryBuilderStateContext as any} store={getRqbStore()}>
     {props.children}
   </Provider>
 );

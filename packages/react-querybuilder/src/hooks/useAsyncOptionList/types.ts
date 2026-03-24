@@ -6,12 +6,12 @@ import type {
   RuleGroupTypeAny,
   RuleType,
 } from '@react-querybuilder/core';
-import type { WithSlice } from '@reduxjs/toolkit';
 import type { ValueEditorProps, VersatileSelectorProps } from '../../types';
-import type { asyncOptionListsSlice } from './asyncOptionListsSlice';
 
 declare module '../../redux/rootReducer' {
-  export interface LazyLoadedSlices extends WithSlice<typeof asyncOptionListsSlice> {}
+  export interface LazyLoadedSlices {
+    asyncOptionLists: AsyncOptionListsSliceState;
+  }
 }
 
 declare module '../../redux/types' {

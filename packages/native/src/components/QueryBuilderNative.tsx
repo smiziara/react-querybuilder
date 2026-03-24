@@ -84,7 +84,7 @@ export const QueryBuilderNative = <
 >(
   props: QueryBuilderNativeProps<RG, F, O, C>
 ): React.JSX.Element => (
-  <Provider context={QueryBuilderStateContext} store={queryBuilderStore}>
+  <Provider context={QueryBuilderStateContext as any} store={queryBuilderStore}>
     <QueryBuilderNativeInternal props={props} />
   </Provider>
 );
